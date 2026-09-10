@@ -1,0 +1,400 @@
+{
+  "info": {
+    "name": "CandidFlow API",
+    "description": "Coleção ordenada para validar o health check e todos os CRUDs do CandidFlow.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "candidateId", "value": "" },
+    { "key": "jobId", "value": "" },
+    { "key": "applicationId", "value": "" },
+    { "key": "feedbackId", "value": "" },
+    { "key": "testEmail", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01 - Health check",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/actuator/health"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('API está disponível', () => pm.response.to.have.status(200));",
+          "pm.test('Status é UP', () => pm.expect(pm.response.json().status).to.eql('UP'));"
+        ]}
+      }]
+    },
+    {
+      "name": "02 - Criar candidato",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"João Victor Martins Cid\",\n  \"email\": \"{{testEmail}}\",\n  \"phone\": \"85999999999\",\n  \"linkedinUrl\": \"https://www.linkedin.com/in/exemplo\",\n  \"githubUrl\": \"https://github.com/jvcid\"\n}"
+        },
+        "url": "{{baseUrl}}/api/candidates"
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": { "type": "text/javascript", "exec": [
+            "pm.collectionVariables.set('testEmail', `joao.candidflow.${Date.now()}@example.com`);"
+          ]}
+        },
+        {
+          "listen": "test",
+          "script": { "type": "text/javascript", "exec": [
+            "pm.test('Candidato criado', () => pm.response.to.have.status(201));",
+            "if (pm.response.code === 201) pm.collectionVariables.set('candidateId', pm.response.json().id);"
+          ]}
+        }
+      ]
+    },
+    {
+      "name": "03 - Listar candidatos",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/candidates?page=0&size=20"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Candidatos listados', () => pm.response.to.have.status(200));"
+        ]}
+      }]
+    },
+    {
+      "name": "04 - Buscar candidato por ID",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/candidates/{{candidateId}}"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Candidato encontrado', () => pm.response.to.have.status(200));"
+        ]}
+      }]
+    },
+    {
+      "name": "05 - Atualizar candidato",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"João Victor Cid\",\n  \"email\": \"{{testEmail}}\",\n  \"phone\": \"85988888888\",\n  \"linkedinUrl\": \"https://www.linkedin.com/in/exemplo\",\n  \"githubUrl\": \"https://github.com/jvcid\"\n}"
+        },
+        "url": "{{baseUrl}}/api/candidates/{{candidateId}}"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Candidato atualizado', () => pm.response.to.have.status(200));"
+        ]}
+      }]
+    },
+    {
+      "name": "06 - Criar vaga",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Estágio em Desenvolvimento Java\",\n  \"company\": \"CandidFlow\",\n  \"description\": \"Desenvolvimento e manutenção de APIs REST.\",\n  \"requirements\": \"Java, Spring Boot, SQL e Git.\",\n  \"location\": \"Fortaleza - CE\",\n  \"workModel\": \"REMOTE\",\n  \"status\": \"OPEN\"\n}"
+        },
+        "url": "{{baseUrl}}/api/jobs"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Vaga criada', () => pm.response.to.have.status(201));",
+          "if (pm.response.code === 201) pm.collectionVariables.set('jobId', pm.response.json().id);"
+        ]}
+      }]
+    },
+    {
+      "name": "07 - Listar vagas",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/jobs?page=0&size=20"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Vagas listadas', () => pm.response.to.have.status(200));"
+        ]}
+      }]
+    },
+    {
+      "name": "08 - Buscar vaga por ID",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/jobs/{{jobId}}"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Vaga encontrada', () => pm.response.to.have.status(200));"
+        ]}
+      }]
+    },
+    {
+      "name": "09 - Atualizar vaga",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Estágio Backend Java\",\n  \"company\": \"CandidFlow\",\n  \"description\": \"Desenvolvimento de APIs REST com Spring Boot.\",\n  \"requirements\": \"Java 21, Spring Boot, Oracle e Docker.\",\n  \"location\": \"Fortaleza - CE\",\n  \"workModel\": \"HYBRID\",\n  \"status\": \"OPEN\"\n}"
+        },
+        "url": "{{baseUrl}}/api/jobs/{{jobId}}"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Vaga atualizada', () => pm.response.to.have.status(200));"
+        ]}
+      }]
+    },
+    {
+      "name": "10 - Criar candidatura",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"candidateId\": {{candidateId}},\n  \"jobId\": {{jobId}},\n  \"coverLetter\": \"Tenho interesse na vaga e experiência acadêmica com Spring Boot.\"\n}"
+        },
+        "url": "{{baseUrl}}/api/applications"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Candidatura criada', () => pm.response.to.have.status(201));",
+          "if (pm.response.code === 201) pm.collectionVariables.set('applicationId', pm.response.json().id);"
+        ]}
+      }]
+    },
+    {
+      "name": "11 - Listar candidaturas",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/applications?page=0&size=20"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Candidaturas listadas', () => pm.response.to.have.status(200));"
+        ]}
+      }]
+    },
+    {
+      "name": "12 - Buscar candidatura por ID",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/applications/{{applicationId}}"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Candidatura encontrada', () => pm.response.to.have.status(200));"
+        ]}
+      }]
+    },
+    {
+      "name": "13 - Listar candidaturas do candidato",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/applications/candidate/{{candidateId}}?page=0&size=20"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Candidaturas do candidato listadas', () => pm.response.to.have.status(200));"
+        ]}
+      }]
+    },
+    {
+      "name": "14 - Listar candidaturas da vaga",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/applications/job/{{jobId}}?page=0&size=20"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Candidaturas da vaga listadas', () => pm.response.to.have.status(200));"
+        ]}
+      }]
+    },
+    {
+      "name": "15 - Atualizar candidatura",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"UNDER_REVIEW\",\n  \"coverLetter\": \"Carta de apresentação atualizada.\"\n}"
+        },
+        "url": "{{baseUrl}}/api/applications/{{applicationId}}"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Candidatura atualizada', () => pm.response.to.have.status(200));"
+        ]}
+      }]
+    },
+    {
+      "name": "16 - Atualizar status da candidatura",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"INTERVIEW\"\n}"
+        },
+        "url": "{{baseUrl}}/api/applications/{{applicationId}}/status"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Status atualizado', () => pm.response.to.have.status(200));"
+        ]}
+      }]
+    },
+    {
+      "name": "17 - Criar feedback",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"applicationId\": {{applicationId}},\n  \"content\": \"Bom desempenho técnico. Candidato encaminhado para entrevista.\"\n}"
+        },
+        "url": "{{baseUrl}}/api/feedbacks"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Feedback criado', () => pm.response.to.have.status(201));",
+          "if (pm.response.code === 201) pm.collectionVariables.set('feedbackId', pm.response.json().id);"
+        ]}
+      }]
+    },
+    {
+      "name": "18 - Listar feedbacks",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/feedbacks?page=0&size=20"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Feedbacks listados', () => pm.response.to.have.status(200));"
+        ]}
+      }]
+    },
+    {
+      "name": "19 - Buscar feedback por ID",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/feedbacks/{{feedbackId}}"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Feedback encontrado', () => pm.response.to.have.status(200));"
+        ]}
+      }]
+    },
+    {
+      "name": "20 - Listar feedbacks da candidatura",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/feedbacks/application/{{applicationId}}?page=0&size=20"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Feedbacks da candidatura listados', () => pm.response.to.have.status(200));"
+        ]}
+      }]
+    },
+    {
+      "name": "21 - Atualizar feedback",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"content\": \"Feedback atualizado após a entrevista técnica.\"\n}"
+        },
+        "url": "{{baseUrl}}/api/feedbacks/{{feedbackId}}"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Feedback atualizado', () => pm.response.to.have.status(200));"
+        ]}
+      }]
+    },
+    {
+      "name": "22 - Excluir feedback",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/api/feedbacks/{{feedbackId}}"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Feedback excluído', () => pm.response.to.have.status(204));"
+        ]}
+      }]
+    },
+    {
+      "name": "23 - Excluir candidatura",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/api/applications/{{applicationId}}"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Candidatura excluída', () => pm.response.to.have.status(204));"
+        ]}
+      }]
+    },
+    {
+      "name": "24 - Excluir vaga",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/api/jobs/{{jobId}}"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Vaga excluída', () => pm.response.to.have.status(204));"
+        ]}
+      }]
+    },
+    {
+      "name": "25 - Excluir candidato",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/api/candidates/{{candidateId}}"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Candidato excluído', () => pm.response.to.have.status(204));"
+        ]}
+      }]
+    }
+  ]
+}
