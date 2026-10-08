@@ -44,3 +44,11 @@ info:
   application:
     name: CandidFlow API
     description: API REST para gerenciamento de vagas e candidaturas
+
+candidflow:
+  security:
+    hmac:
+      enabled: ${HMAC_ENABLED:true}
+      api-key: ${HMAC_API_KEY:}
+      secret: ${HMAC_SECRET:}
+      max-clock-skew-seconds: ${HMAC_MAX_CLOCK_SKEW_SECONDS:300}

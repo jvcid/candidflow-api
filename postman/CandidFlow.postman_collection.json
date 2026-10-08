@@ -10,7 +10,38 @@
     { "key": "jobId", "value": "" },
     { "key": "applicationId", "value": "" },
     { "key": "feedbackId", "value": "" },
-    { "key": "testEmail", "value": "" }
+    { "key": "testEmail", "value": "" },
+    { "key": "hmacApiKey", "value": "candidflow-client" },
+    { "key": "hmacSecret", "value": "COLOQUE_A_MESMA_CHAVE_DO_HMAC_SECRET" }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.request.name === '02 - Criar candidato') pm.collectionVariables.set('testEmail', `joao.candidflow.${Date.now()}@example.com`);",
+          "const rawPath = pm.variables.replaceIn(pm.request.url.getPath());",
+          "const path = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;",
+          "if (!path.startsWith('/api/')) return;",
+          "const CryptoJS = pm.require('npm:crypto-js@4.2.0');",
+          "const timestamp = Math.floor(Date.now() / 1000).toString();",
+          "const nonce = pm.variables.replaceIn('{{$guid}}');",
+          "const query = pm.variables.replaceIn(pm.request.url.getQueryString() || '');",
+          "const requestTarget = query ? `${path}?${query}` : path;",
+          "const body = pm.request.body && pm.request.body.mode === 'raw'",
+          "  ? pm.variables.replaceIn(pm.request.body.raw || '')",
+          "  : '';",
+          "const bodyHash = CryptoJS.SHA256(body).toString(CryptoJS.enc.Hex);",
+          "const canonicalRequest = [pm.request.method.toUpperCase(), requestTarget, timestamp, nonce, bodyHash].join('\\n');",
+          "const signature = CryptoJS.HmacSHA256(canonicalRequest, pm.collectionVariables.get('hmacSecret')).toString(CryptoJS.enc.Hex);",
+          "pm.request.headers.upsert({ key: 'X-API-Key', value: pm.collectionVariables.get('hmacApiKey') });",
+          "pm.request.headers.upsert({ key: 'X-Timestamp', value: timestamp });",
+          "pm.request.headers.upsert({ key: 'X-Nonce', value: nonce });",
+          "pm.request.headers.upsert({ key: 'X-Signature', value: signature });"
+        ]
+      }
+    }
   ],
   "item": [
     {
@@ -39,12 +70,6 @@
         "url": "{{baseUrl}}/api/candidates"
       },
       "event": [
-        {
-          "listen": "prerequest",
-          "script": { "type": "text/javascript", "exec": [
-            "pm.collectionVariables.set('testEmail', `joao.candidflow.${Date.now()}@example.com`);"
-          ]}
-        },
         {
           "listen": "test",
           "script": { "type": "text/javascript", "exec": [

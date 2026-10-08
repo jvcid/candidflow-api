@@ -101,6 +101,46 @@ Health check:
 GET /actuator/health
 ```
 
+## Autenticação HMAC
+
+Todas as rotas em `/api/**` exigem uma assinatura HMAC-SHA256. O health check
+`/actuator/health` permanece público para o Render.
+
+Cabeçalhos obrigatórios:
+
+| Cabeçalho | Conteúdo |
+|---|---|
+| `X-API-Key` | Identificador configurado em `HMAC_API_KEY` |
+| `X-Timestamp` | Horário Unix em segundos |
+| `X-Nonce` | UUID único por requisição |
+| `X-Signature` | Assinatura hexadecimal HMAC-SHA256 |
+
+A mensagem canônica assinada é:
+
+```text
+MÉTODO_HTTP
+/caminho?query=string
+TIMESTAMP
+NONCE
+SHA256_HEXADECIMAL_DO_CORPO
+```
+
+O servidor rejeita assinatura incorreta, timestamp fora da janela configurada e
+reutilização do nonce. O HMAC garante autenticidade e integridade; o HTTPS continua
+obrigatório para garantir confidencialidade.
+
+Gere um segredo de 32 bytes no PowerShell:
+
+```powershell
+[Convert]::ToHexString(
+  [Security.Cryptography.RandomNumberGenerator]::GetBytes(32)
+).ToLower()
+```
+
+Configure `HMAC_API_KEY` e `HMAC_SECRET` tanto localmente quanto no Render. A coleção
+do Postman possui um script que gera automaticamente timestamp, nonce e assinatura;
+basta preencher as variáveis `hmacApiKey` e `hmacSecret` com os mesmos valores do servidor.
+
 ## Executar localmente
 
 Defina as variáveis no PowerShell:
@@ -109,6 +149,9 @@ Defina as variáveis no PowerShell:
 $env:DB_URL='jdbc:oracle:thin:@(description=...connection string TLS candidflow_tp...)'
 $env:DB_USERNAME='CANDIDFLOW_APP'
 $env:DB_PASSWORD='senha_do_usuario_da_aplicacao'
+$env:HMAC_ENABLED='true'
+$env:HMAC_API_KEY='candidflow-client'
+$env:HMAC_SECRET='cole_a_chave_gerada_com_32_bytes_ou_mais'
 ```
 
 Execute:

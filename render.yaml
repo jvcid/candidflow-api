@@ -11,5 +11,13 @@ services:
         sync: false
       - key: DB_PASSWORD
         sync: false
+      - key: HMAC_ENABLED
+        value: "true"
+      - key: HMAC_API_KEY
+        sync: false
+      - key: HMAC_SECRET
+        sync: false
+      - key: HMAC_MAX_CLOCK_SKEW_SECONDS
+        value: "300"
       - key: JAVA_OPTS
         value: -XX:MaxRAMPercentage=75.0
