@@ -1,6 +1,7 @@
 package br.com.candidflow.dto.request;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -25,6 +26,9 @@ public class CandidateRequestDTO {
 
     @Size(max = 30, message = "O telefone deve ter no máximo 30 caracteres")
     private String phone;
+
+    @Pattern(regexp = "[0-9]{5}-?[0-9]{3}", message = "Informe um CEP com 8 digitos")
+    private String cep;
 
     @Size(max = 500, message = "A URL do LinkedIn deve ter no máximo 500 caracteres")
     private String linkedinUrl;

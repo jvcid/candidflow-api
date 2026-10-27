@@ -15,6 +15,7 @@ public class CandidateMapper {
                 .name(request.getName().trim())
                 .email(normalizeEmail(request.getEmail()))
                 .phone(normalizeOptional(request.getPhone()))
+                .cep(request.getCep() == null ? null : request.getCep().replace("-", ""))
                 .linkedinUrl(normalizeOptional(request.getLinkedinUrl()))
                 .githubUrl(normalizeOptional(request.getGithubUrl()))
                 .build();
@@ -24,6 +25,7 @@ public class CandidateMapper {
         candidate.setName(request.getName().trim());
         candidate.setEmail(normalizeEmail(request.getEmail()));
         candidate.setPhone(normalizeOptional(request.getPhone()));
+        candidate.setCep(request.getCep() == null ? null : request.getCep().replace("-", ""));
         candidate.setLinkedinUrl(normalizeOptional(request.getLinkedinUrl()));
         candidate.setGithubUrl(normalizeOptional(request.getGithubUrl()));
     }
@@ -34,6 +36,7 @@ public class CandidateMapper {
                 .name(candidate.getName())
                 .email(candidate.getEmail())
                 .phone(candidate.getPhone())
+                .cep(candidate.getCep())
                 .linkedinUrl(candidate.getLinkedinUrl())
                 .githubUrl(candidate.getGithubUrl())
                 .createdAt(candidate.getCreatedAt())

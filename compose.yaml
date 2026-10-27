@@ -7,6 +7,8 @@ services:
       - "8080:8080"
     environment:
       PORT: 8080
+      HMAC_API_KEY: ${HMAC_API_KEY:?Configure HMAC_API_KEY}
+      HMAC_SECRET: ${HMAC_SECRET:?Configure HMAC_SECRET}
       DB_URL: ${DB_URL}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
