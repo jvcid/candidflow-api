@@ -40,6 +40,8 @@ Na seção **Environment**, adicione:
 DB_URL       = jdbc:oracle:thin:@(description=...string completa candidflow_tp...)
 DB_USERNAME  = CANDIDFLOW_APP
 DB_PASSWORD  = senha do CANDIDFLOW_APP
+HMAC_API_KEY = candidflow-client
+HMAC_SECRET  = segredo aleatorio de pelo menos 32 bytes
 JAVA_OPTS    = -XX:MaxRAMPercentage=75.0
 ```
 

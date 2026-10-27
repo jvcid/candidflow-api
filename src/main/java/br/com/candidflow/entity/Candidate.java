@@ -39,6 +39,9 @@ public class Candidate {
     @Column(length = 30)
     private String phone;
 
+    @Column(length = 8)
+    private String cep;
+
     @Column(name = "linkedin_url", length = 500)
     private String linkedinUrl;
 

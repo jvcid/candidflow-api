@@ -16,6 +16,8 @@ public class CandidateResponseDTO {
     private String name;
     private String email;
     private String phone;
+
+    private String cep;
     private String linkedinUrl;
     private String githubUrl;
     private LocalDateTime createdAt;

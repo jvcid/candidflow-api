@@ -18,6 +18,12 @@ import java.util.Map;
 @Slf4j
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(AddressIntegrationException.class)
+    public ResponseEntity<ApiErrorResponse> handleAddressIntegration(
+            AddressIntegrationException exception, HttpServletRequest request) {
+        return buildResponse(exception.getStatus(), exception.getMessage(), request, null);
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleNotFound(
             ResourceNotFoundException exception,

@@ -65,7 +65,7 @@
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"João Victor Martins Cid\",\n  \"email\": \"{{testEmail}}\",\n  \"phone\": \"85999999999\",\n  \"linkedinUrl\": \"https://www.linkedin.com/in/exemplo\",\n  \"githubUrl\": \"https://github.com/jvcid\"\n}"
+          "raw": "{\n  \"name\": \"João Victor Martins Cid\",\n  \"email\": \"{{testEmail}}\",\n  \"phone\": \"85999999999\",\n  \"linkedinUrl\": \"https://www.linkedin.com/in/exemplo\",\n  \"githubUrl\": \"https://github.com/jvcid\",\n  \"cep\": \"01001-000\"\n}"
         },
         "url": "{{baseUrl}}/api/candidates"
       },
@@ -112,7 +112,7 @@
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"João Victor Cid\",\n  \"email\": \"{{testEmail}}\",\n  \"phone\": \"85988888888\",\n  \"linkedinUrl\": \"https://www.linkedin.com/in/exemplo\",\n  \"githubUrl\": \"https://github.com/jvcid\"\n}"
+          "raw": "{\n  \"name\": \"João Victor Cid\",\n  \"email\": \"{{testEmail}}\",\n  \"phone\": \"85988888888\",\n  \"linkedinUrl\": \"https://www.linkedin.com/in/exemplo\",\n  \"githubUrl\": \"https://github.com/jvcid\",\n  \"cep\": \"01001-000\"\n}"
         },
         "url": "{{baseUrl}}/api/candidates/{{candidateId}}"
       },
@@ -122,6 +122,81 @@
           "pm.test('Candidato atualizado', () => pm.response.to.have.status(200));"
         ]}
       }]
+    },
+    {
+      "name": "05a - Endereco do candidato por CEP",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/candidates/{{candidateId}}/address",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "candidates",
+            "{{candidateId}}",
+            "address"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Endereco combinado com candidato\", () => { pm.response.to.have.status(200); const data = pm.response.json(); pm.expect(String(data.candidate.id)).to.eql(String(pm.collectionVariables.get(\"candidateId\"))); pm.expect(data.addresses).to.be.an(\"array\").that.is.not.empty; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05b - Pesquisar CEP para candidato",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/candidates/{{candidateId}}/address/search?uf=SP&city=Sao%20Paulo&street=Praca%20da%20Se",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "candidates",
+            "{{candidateId}}",
+            "address",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "uf",
+              "value": "SP"
+            },
+            {
+              "key": "city",
+              "value": "Sao Paulo"
+            },
+            {
+              "key": "street",
+              "value": "Praca da Se"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Endereco combinado com candidato\", () => { pm.response.to.have.status(200); const data = pm.response.json(); pm.expect(String(data.candidate.id)).to.eql(String(pm.collectionVariables.get(\"candidateId\"))); pm.expect(data.addresses).to.be.an(\"array\").that.is.not.empty; });"
+            ]
+          }
+        }
+      ]
     },
     {
       "name": "06 - Criar vaga",

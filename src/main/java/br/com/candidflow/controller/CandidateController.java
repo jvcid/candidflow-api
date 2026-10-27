@@ -2,6 +2,10 @@ package br.com.candidflow.controller;
 
 import br.com.candidflow.dto.request.CandidateRequestDTO;
 import br.com.candidflow.dto.response.CandidateResponseDTO;
+import br.com.candidflow.dto.response.CandidateAddressResponseDTO;
+import br.com.candidflow.service.AddressService;
+import org.springframework.web.bind.annotation.RequestParam;
+import java.util.List;
 import br.com.candidflow.service.CandidateService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +31,26 @@ import java.net.URI;
 public class CandidateController {
 
     private final CandidateService candidateService;
+    private final AddressService addressService;
+
+    @GetMapping("/{id}/address")
+    public ResponseEntity<CandidateAddressResponseDTO> address(@PathVariable Long id) {
+        var candidate = candidateService.findById(id);
+        var address = addressService.findByCep(candidate.getCep());
+        return ResponseEntity.ok(new CandidateAddressResponseDTO(candidate, List.of(address)));
+    }
+
+    @GetMapping("/{id}/address/search")
+    public ResponseEntity<CandidateAddressResponseDTO> searchAddress(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "") String uf,
+            @RequestParam(defaultValue = "") String city,
+            @RequestParam(defaultValue = "") String street) {
+        var candidate = candidateService.findById(id);
+        return ResponseEntity.ok(new CandidateAddressResponseDTO(
+                candidate, addressService.search(uf, city, street)));
+    }
+
 
     @PostMapping
     public ResponseEntity<CandidateResponseDTO> create(@Valid @RequestBody CandidateRequestDTO request) {

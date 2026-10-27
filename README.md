@@ -61,6 +61,21 @@ Resposta JSON   ← Controller ← Service ← Mapper     ← Entidade
 | `PUT` | `/api/candidates/{id}` | Atualizar |
 | `DELETE` | `/api/candidates/{id}` | Excluir |
 
+#### Integração de endereços pelo ViaCEP
+
+A API consulta o [ViaCEP](https://viacep.com.br/), serviço público e gratuito, para localizar endereços brasileiros por CEP. O campo opcional `cep` pode ser enviado no cadastro ou na atualização do candidato, com ou sem hífen (`01001000` ou `01001-000`), e é armazenado com oito dígitos. A migração V2 adiciona essa coluna sem afetar os registros existentes.
+
+| Método | Endpoint | Consulta ao ViaCEP |
+|---|---|---|
+| `GET` | `/api/candidates/{id}/address` | `/ws/{cep}/json/`, usando o CEP cadastrado |
+| `GET` | `/api/candidates/{id}/address/search?uf=SP&city=Sao%20Paulo&street=Praca%20da%20Se` | `/ws/{uf}/{cidade}/{logradouro}/json/` |
+
+Cada resposta combina o candidato consultado no Oracle (`candidate`) com os endereços retornados pelo ViaCEP (`addresses`), que incluem CEP, logradouro, bairro, cidade, UF, código IBGE e DDD. A pesquisa por endereço pode localizar um CEP para ser informado depois no cadastro; ela não atualiza o candidato automaticamente. As consultas são feitas em tempo real, sem salvar o resultado nem enviar nome ou e-mail ao ViaCEP. O serviço não determina o número do imóvel nem um complemento pessoal.
+
+Para testar as duas operações, cadastre um candidato com `"cep": "01001-000"` e execute as duas requisições correspondentes na coleção Postman antes de excluir o candidato. As rotas usam a mesma autenticação HMAC das demais; ao assinar a pesquisa, inclua a query string.
+
+Erros retornados: `400` para CEP ausente ou filtros inválidos, `404` para candidato ou CEP não encontrado e `502` quando o ViaCEP estiver indisponível. Uma pesquisa sem resultados retorna `addresses: []`. Cada rota tem timeout de 3 segundos para conexão e 5 segundos para resposta. O CRUD de candidatos não depende da disponibilidade do ViaCEP.
+
 ### Vagas
 
 | Método | Endpoint | Operação |
@@ -197,6 +212,8 @@ docker run --name candidflow-api --rm -p 8080:8080 `
   -e DB_URL="$env:DB_URL" `
   -e DB_USERNAME="$env:DB_USERNAME" `
   -e DB_PASSWORD="$env:DB_PASSWORD" `
+  -e HMAC_API_KEY="$env:HMAC_API_KEY" `
+  -e HMAC_SECRET="$env:HMAC_SECRET" `
   candidflow-api
 ```
 
